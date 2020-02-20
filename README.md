@@ -4,7 +4,9 @@
 
 A docker Compose project for [MISP](http://www.misp-project.org) ("Malware Information Sharing Platform").
 
-This is a work in progress rewrite of the [MISP Docker (XME edition)](https://github.com/MISP/misp-docker) to resolve longstanding bugs and add new features. Please see the issues tab for known issues.
+This is a work in progress rewrite of the [MISP Docker (XME edition)](https://github.com/MISP/misp-docker) to resolve longstanding bugs and add new features.
+
+*Warning*: Please see the Issues tab for known issues.
 
 ## Features
 
