@@ -1,4 +1,4 @@
-FROM nginx:1.9
+FROM nginx:1.17
 
 RUN openssl dhparam -out /etc/ssl/certs/dhparam.pem 4096
 
