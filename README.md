@@ -6,7 +6,7 @@ A docker Compose project for [MISP](http://www.misp-project.org) ("Malware Infor
 
 This is a work in progress rewrite of the [MISP Docker (XME edition)](https://github.com/MISP/misp-docker) to resolve longstanding bugs and add new features.
 
-*Warning*: Please see the [Issues](https://github.com/seanthegeek/misp-docker/issues) tab for known issues.
+**Warning**: Please see the [Issues](https://github.com/seanthegeek/misp-docker/issues) tab for known issues.
 
 ## Features
 
