@@ -2,12 +2,13 @@
 
 [![Build status](https://travis-ci.org/seanthegeek/misp-docker.svg?branch=master)](https://travis-ci.org/seanthegeek/misp-docker)
 
-The files in this repository are used to create a Docker container running a [MISP](http://www.misp-project.org) ("Malware Information Sharing Platform") instance.
+A docker Compose project for [MISP](http://www.misp-project.org) ("Malware Information Sharing Platform").
 
 This is a work in progress rewrite of the [MISP Docker (XME edition)][https://github.com/MISP/misp-docker] to resolve longstanding bugs and add new features. Please see the issues tab for known issues.
 
 ## Features
 
+* Creates separate Docker containers for the database, web server, and reverse proxy
 * Reconfiguration of the base URL in `config.php`
 * Generation of a new salt in `config.php`
 * Generation of a self-signed certificate
