@@ -47,6 +47,6 @@ docker-compose build
 
 ### Run the containers
 
-``` bash
+```bash
 docker-compose up -d
 ```
