@@ -20,32 +20,32 @@ This is a work in progress rewrite of the [MISP Docker (XME edition)](https://gi
 
 ## Setup
 
-1. Add your `misp.crt` and `misp.key` files to the `./proxy/ssl` folder
-2. Update `server_name` in `default.conf` file (will implement ENVIRONMENT VARIABLE in the future)
-
-### Building your image
-
-#### Fetch files
+### Fetch files
 
 ```bash
 git clone https://github.com/seanthegeek/misp-docker
 cd misp-docker
 ```
 
-## Edit the .env file
+### Prep for building
+
+1. Add your `misp.crt` and `misp.key` files to the `./proxy/ssl` folder
+2. Update `server_name` in `default.conf` file with your hostname
+
+#### Edit the .env file
 
 ```bash
 cp template.env .env
 nano .env
 ```
 
-## Build the containers
+### Build the containers
 
 ```bash
 docker-compose build
 ```
 
-## Run the containers
+### Run the containers
 
 ``` bash
 docker-compose up -d
