@@ -1,4 +1,6 @@
-FROM nginx:1.17
+FROM nginx:1.16
+
+RUN apt-get install -y openssl
 
 RUN openssl dhparam -out /etc/ssl/certs/dhparam.pem 4096
 
