@@ -11,4 +11,5 @@ before_install:
   - bash -c "[ -f .travis.yml ] || echo 'Could not find docker-compose'"
 
 script:
+  - cp template.env .env
   - docker-compose build
