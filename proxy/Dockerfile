@@ -1,6 +1,6 @@
 FROM nginx:1.16
 
-ARG MISP_HOSTNAME
+ARG MISP_FQDN
 
 RUN apt-get update
 
@@ -9,7 +9,7 @@ RUN apt-get install -y openssl ca-certificates
 RUN mkdir -p /etc/nginx/ssl
 
 RUN openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 \
-    -subj "/CN=$MISP_HOSTNAME/O=Acme Corporation/OU=Information Security/C=US/ST=Denial/L=Springfield" \
+    -subj "/CN=$MISP_FQDN/O=Acme Corporation/OU=Information Security/C=US/ST=Denial/L=Springfield" \
     -keyout /etc/nginx/ssl/misp.key  \
     -out /etc/nginx/ssl/misp.crt
 

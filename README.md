@@ -16,9 +16,21 @@ This is a work in progress rewrite of the [MISP Docker (XME edition)](https://gi
 * Generation of a self-signed certificate
 * Optimization of `php.ini` to match the MISP recommended values
 * Creation of the MySQL database
-* Generation of the admin PGP key
+* Generation of the MSIP PGP key
 
 ## Setup
+
+## Install Docker
+
+```bash
+sudo apt-get install -y docker.io git curl
+```
+
+## Install Docker Compose
+
+```bash
+sudo curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+```
 
 ### Fetch files
 
@@ -29,10 +41,9 @@ cd misp-docker
 
 ### Prep for building
 
-1. Add your `misp.crt` and `misp.key` files to the `./proxy/ssl` folder
-2. Update `server_name` in `default.conf` file with your hostname
+Add your `misp.crt` and `misp.key` files to the `./proxy/ssl` folder
 
-#### Edit the .env file
+#### Create a .env file to store your custom settings
 
 ```bash
 cp template.env .env

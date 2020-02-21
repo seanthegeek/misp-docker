@@ -1,12 +1,12 @@
 #!/bin/bash
 #
 # MISP docker startup script
-# Xavier Mertens <xavier@rootshell.be>
+# Originally by  Xavier Mertens <xavier@rootshell.be>
 #
 # 2017/05/17 - Created
 # 2017/05/31 - Fixed small errors
 # 2019/10/17 - Use built-in mysql docker DB creation and use std env names (dafal)
-#
+# 2020/02/21 - Updated by Sean Whalen to configure PGP settings
 
 set -e
 
@@ -96,33 +96,45 @@ if [ -r /.firstboot.tmp ]; then
         sed -i "s/db\s*password/$MYSQL_PASSWORD/" database.php
 
         # Fix the base url
-        if [ -z "$MISP_BASEURL" ]; then
+        if [ -z "$MISP_FQDN" ]; then
                 echo "No base URL defined, don't forget to define it manually!"
         else
-                echo "Fixing the MISP base URL (https://$MISP_DOMAIN) ..."
-                sed -i "s/'baseurl' => '',/'baseurl' => '$MISP_DOMAIN',/" /var/www/MISP/app/Config/config.php
+                echo "Fixing the MISP base URL (https://$MISP_FQDN) ..."
+                sed -i "s/'baseurl' => '',/'baseurl' => 'https://$MISP_FQDN',/" /var/www/MISP/app/Config/config.php
+        fi
+
+        # Fix the org name
+        if [ -z "$MISP_FQDN" ]; then
+                echo "No org name defined, don't forget to define it manually!"
+        else
+                echo "Setting the MISP org name"
+                sed -i "s/'org' => '',/'org' => '$MISP_ORG',/" /var/www/MISP/app/Config/config.php
         fi
 
         # Generate the admin user PGP key
-        echo "Creating admin GnuPG key"
-        if [ -z "$MISP_ADMIN_EMAIL" -o -z "$MISP_ADMIN_PASSPHRASE" ]; then
-                echo "No admin details provided, don't forget to generate the PGP key manually!"
+        echo "Creating MISP GnuPG key"
+        if [ -z "$PGP_EMAIL" -o -z "$PGP_PASSPHRASE" ]; then
+                echo "No PGP details provided. Don't forget to generate the PGP key manually!"
         else
                 echo "Generating admin PGP key ... (please be patient, we need some entropy)"
                 cat >/tmp/gpg.tmp <<GPGEOF
 %echo Generating a basic OpenPGP key
 Key-Type: RSA
 Key-Length: 2048
-Name-Real: MISP Admin
-Name-Email: $MISP_ADMIN_EMAIL
+Name-Real: $MISP_ORG
+Name-Email: $PGP_EMAIL
 Expire-Date: 0
-Passphrase: $MISP_ADMIN_PASSPHRASE
+Passphrase: $PGP_PASSPHRASE
 %commit
 %echo Done
 GPGEOF
                 sudo -u www-data gpg --homedir /var/www/MISP/.gnupg --gen-key --batch /tmp/gpg.tmp >>/tmp/install.log
                 rm -f /tmp/gpg.tmp
-		sudo -u www-data gpg --homedir /var/www/MISP/.gnupg --export --armor $MISP_ADMIN_EMAIL > /var/www/MISP/app/webroot/gpg.asc
+                sudo -u www-data gpg --homedir /var/www/MISP/.gnupg --export --armor $PGP_EMAIL > /var/www/MISP/app/webroot/gpg.asc
+                sed -i "s/'email' => '',/'email' => '$PGP_EMAIL',/" /var/www/MISP/app/Config/config.php
+                sed -i "s/'contact' => '',/'contact' => '$PGP_EMAIL',/" /var/www/MISP/app/Config/config.php
+                sed -i "s/'homedir' => '',/'homedir' => '/var/www/MISP/.gnupg',/" /var/www/MISP/app/Config/config.php
+
         fi
 
         # Display tips
@@ -131,7 +143,7 @@ Congratulations!
 Your MISP docker has been successfully booted for the first time.
 Don't forget:
 - Reconfigure postfix to match your environment
-- Change the MISP admin email address to $MISP_ADMIN_EMAIL
+- Change the MISP admin email address to $PGP_EMAIL
 
 __WELCOME__
         rm -f /.firstboot.tmp

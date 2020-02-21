@@ -27,8 +27,9 @@ services:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MISP_ADMIN_EMAIL=${MISP_ADMIN_EMAIL}
-      - MISP_ADMIN_PASSPHRASE=${MISP_ADMIN_PASSPHRASE}
+      - PGP_EMAIL=${PGP_EMAIL}
+      - PGP_PASSPHRASE=${PGP_PASSPHRASE}
+      - MISP_ORG=${MISP_ORG}
       - POSTFIX_RELAY_HOST=${POSTFIX_RELAY_HOST}
       - TIMEZONE=${TIMEZONE}
 
@@ -36,7 +37,7 @@ services:
     build:
       context: proxy
       args:
-       - MISP_HOSTNAME=${MISP_HOSTNAME}
+       - MISP_FQDN=${MISP_FQDN}
     container_name: proxy
     restart: unless-stopped
     image: misp-proxy:latest
