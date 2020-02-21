@@ -2,20 +2,15 @@ FROM nginx:1.16
 
 RUN apt-get update
 
-RUN apt-get install -y openssl
-
-RUN openssl dhparam -out /etc/ssl/certs/dhparam.pem 4096
+RUN apt-get install -y openssl ca-certificates
 
 RUN openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 \
     -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=$MISP_DOMAIN" \
     -keyout /etc/ssl/certs/nginx/misp.key  \
     -out /etc/ssl/certs/nginx/misp.cert
 
-#  default conf for proxy service
+# Copy  default conf file for proxy service
 COPY ./default.conf /etc/nginx/conf.d/default.conf
 
-#  Proxy and SSL configurations
-COPY ./includes/ /etc/nginx/includes/
-
-# Proxy SSL certificates
+# Copy roxy SSL certificates
 COPY ./ssl/ /etc/ssl/certs/nginx/
