@@ -99,8 +99,8 @@ if [ -r /.firstboot.tmp ]; then
         if [ -z "$MISP_BASEURL" ]; then
                 echo "No base URL defined, don't forget to define it manually!"
         else
-                echo "Fixing the MISP base URL ($MISP_BASEURL) ..."
-                sed -i "s/'baseurl' => '',/'baseurl' => '$MISP_BASEURL',/" /var/www/MISP/app/Config/config.php
+                echo "Fixing the MISP base URL (https://$MISP_DOMAIN) ..."
+                sed -i "s/'baseurl' => '',/'baseurl' => '$MISP_DOMAIN',/" /var/www/MISP/app/Config/config.php
         fi
 
         # Generate the admin user PGP key
