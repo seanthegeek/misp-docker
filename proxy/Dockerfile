@@ -1,16 +1,20 @@
 FROM nginx:1.16
 
+ARG MISP_HOSTNAME
+
 RUN apt-get update
 
 RUN apt-get install -y openssl ca-certificates
 
+RUN mkdir -p /etc/nginx/ssl
+
 RUN openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 \
-    -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=$MISP_DOMAIN" \
-    -keyout /etc/ssl/certs/nginx/misp.key  \
-    -out /etc/ssl/certs/nginx/misp.crt
+    -subj "/CN=$MISP_HOSTNAME/O=Acme Corporation/OU=Information Security/C=US/ST=Denial/L=Springfield" \
+    -keyout /etc/nginx/ssl/misp.key  \
+    -out /etc/nginx/ssl/misp.crt
 
 # Copy  default conf file for proxy service
 COPY ./default.conf /etc/nginx/conf.d/default.conf
 
-# Copy roxy SSL certificates
-COPY ./ssl/ /etc/ssl/certs/nginx/
+# Copy proxy SSL certificates
+COPY ./ssl/ /etc/nginx/ssl/

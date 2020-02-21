@@ -1,4 +1,4 @@
-version: '2'
+version: '3.3'
 
 services:
   db:
@@ -29,13 +29,14 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MISP_ADMIN_EMAIL=${MISP_ADMIN_EMAIL}
       - MISP_ADMIN_PASSPHRASE=${MISP_ADMIN_PASSPHRASE}
-      - MISP_HOSTNAME=${MISP_HOSTNAME}
       - POSTFIX_RELAY_HOST=${POSTFIX_RELAY_HOST}
       - TIMEZONE=${TIMEZONE}
 
   proxy:
     build:
       context: proxy
+      args:
+       - MISP_HOSTNAME=${MISP_HOSTNAME}
     container_name: proxy
     restart: unless-stopped
     image: misp-proxy:latest
@@ -44,5 +45,3 @@ services:
     ports:
       - 80:80
       - 443:443
-    environment:
-      - MISP_HOSTNAME=${MISP_HOSTNAME}
