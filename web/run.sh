@@ -133,7 +133,7 @@ GPGEOF
                 sudo -u www-data gpg --homedir /var/www/MISP/.gnupg --export --armor $PGP_EMAIL > /var/www/MISP/app/webroot/gpg.asc
                 sed -i "s/'email' => '',/'email' => '$PGP_EMAIL',/" /var/www/MISP/app/Config/config.php
                 sed -i "s/'contact' => '',/'contact' => '$PGP_EMAIL',/" /var/www/MISP/app/Config/config.php
-                sed -i "s/'homedir' => '',/'homedir' => '/var/www/MISP/.gnupg',/" /var/www/MISP/app/Config/config.php
+                sed -i "s/'homedir' => '',/'homedir' => '\/var\/www\/MISP\/.gnupg',/" /var/www/MISP/app/Config/config.php
 
         fi
 
