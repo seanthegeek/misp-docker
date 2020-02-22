@@ -4,15 +4,16 @@ FROM debian:buster
 # Install core components
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update && \
-    apt-get dist-upgrade -y && apt-get autoremove -y && apt-get clean && \
+RUN apt-get update && apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
+    && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+ENV LANG en_US.utf8
+
+RUN apt-get dist-upgrade -y && apt-get autoremove -y && apt-get clean && \
     apt-get install -y software-properties-common && \
     apt-get install -y postfix && \
     apt-get install -y mariadb-client curl gcc git gnupg-agent \
-        make python openssl redis-server sudo vim nano less zip locales
+        make python openssl redis-server sudo vim nano less zip
 
-RUN locale-gen en_US.UTF-8
-ENV LANG en_US.UTF-8
 
 # Apache
 RUN apt-get install -y apache2 apache2-doc apache2-utils && \
