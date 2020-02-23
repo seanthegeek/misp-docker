@@ -4,7 +4,7 @@ FROM debian:buster
 # Install core components
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update && apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
+RUN apt-get update && apt-get install -y locales apt-utils && rm -rf /var/lib/apt/lists/* \
     && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 ENV LANG en_US.utf8
 
@@ -88,14 +88,13 @@ RUN chown -R www-data:www-data /var/www/MISP && \
 RUN cp /var/www/MISP/INSTALL/misp.logrotate /etc/logrotate.d/misp
 
 # Preconfigure setting for packages
-RUN echo "postfix postfix/main_mailer_type string Local only" \
-  | debconf-set-selections && \
-    echo "postfix postfix/mailname string localhost.localdomain" | \
-    debconf-set-selections
+#RUN echo "postfix postfix/main_mailer_type string Local only" \
+#  | debconf-set-selections && \
+#   echo "postfix postfix/mailname string localhost.localdomain" | \
+#   debconf-set-selections
 
 # Redis Setup
 RUN sed -i 's/^\(daemonize\s*\)yes\s*$/\1no/g' /etc/redis/redis.conf
-RUN sed -i 's/^\(bind\s*\)127.0.0.1 ::1\s*$/\1127.0.0.1/g' /etc/redis/redis.conf
 
 # Add a healthcheck endpoint
 COPY healthcheck.patch healthcheck.patch
@@ -120,8 +119,8 @@ RUN sudo -u www-data cp -a /var/www/MISP/app/Config/bootstrap.default.php /var/w
 RUN sed -i -E "s/'salt'\s=>\s'(\S+)'/'salt' => '`openssl rand -base64 32|tr "/" "-"`'/" /var/www/MISP/app/Config/config.php
 
 # Enable workers at boot time
-RUN chmod a+x /var/www/MISP/app/Console/worker/start.sh && \
-    echo "sudo -u www-data bash /var/www/MISP/app/Console/worker/start.sh" >>/etc/rc.local
+#RUN chmod a+x /var/www/MISP/app/Console/worker/start.sh && \
+#    echo "sudo -u www-data bash /var/www/MISP/app/Console/worker/start.sh" >>/etc/rc.local
 
 # Install templates & stuff
 WORKDIR /var/www/MISP/app/files
@@ -132,46 +131,29 @@ RUN rm -rf misp-objects && git clone https://github.com/MISP/misp-objects.git &&
     chown -R www-data:www-data misp-objects misp-galaxy warninglists taxonomies
 
 # Install MISP build requirements
-RUN sudo -E apt-get -y install libpoppler-glib8 libpoppler-dev libpoppler-cpp-dev
+RUN sudo apt-get install cmake python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr libpoppler-cpp-dev imagemagick virtualenv libopencv-dev zbar-tools libzbar0 libzbar-dev libfuzzy-dev build-essential -y
 
-# Install MISP Modules
-WORKDIR /opt
-RUN git clone https://github.com/MISP/misp-modules.git
-RUN cd misp-modules && \
-    pip3 install -I -r REQUIREMENTS && \
-    pip3 install -I . && \
-    echo "sudo -u www-data misp-modules -s -l 127.0.0.1 &" >>/etc/rc.local
+# Install misp-modules inside a virtualenv
+RUN sudo -u www-data virtualenv -p python3 /var/www/MISP/venv
+WORKDIR /usr/local/src/
+RUN chown -R www-data .
+RUN git clone https://github.com/stricaud/faup.git
+WORKDIR /usr/local/src/faup/build
+RUN cmake .. && make
+RUN sudo make install
+RUN sudo ldconfig
+WORKDIR /usr/local/src/faup/src/lib/bindings/python
+RUN sudo -u www-data /var/www/MISP/venv/bin/pip install .
+WORKDIR /usr/local/src
+RUN sudo git clone https://github.com/MISP/misp-modules.git
+WORKDIR /usr/local/src/misp-modules
+RUN touch misp_modules/modules/expansion/_ransomcoindb/__init__.py
+RUN chown -R www-data .
+RUN sudo -u www-data /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
+RUN sudo -u www-data /var/www/MISP/venv/bin/pip install .
 
 # Supervisord Setup
-RUN ( \
-    echo '[supervisord]'; \
-    echo 'nodaemon = true'; \
-    echo ''; \
-    echo '[program:postfix]'; \
-    echo 'process_name = master'; \
-    echo 'directory = /etc/postfix'; \
-    echo 'command = /usr/sbin/postfix -c /etc/postfix start'; \
-    echo 'startsecs = 0'; \
-    echo 'autorestart = false'; \
-    echo ''; \
-    echo '[program:redis-server]'; \
-    echo 'command=redis-server /etc/redis/redis.conf'; \
-    echo ''; \
-    echo '[program:apache2]'; \
-    echo 'command=/bin/bash -c "source /etc/apache2/envvars && exec /usr/sbin/apache2 -D FOREGROUND"'; \
-    echo ''; \
-    echo '[program:resque]'; \
-    echo 'command=/bin/bash /var/www/MISP/app/Console/worker/start.sh'; \
-    echo 'user = www-data'; \
-    echo 'startsecs = 0'; \
-    echo 'autorestart = false'; \
-    echo ''; \
-    echo '[program:misp-modules]'; \
-    echo 'command=/bin/bash -c "misp-modules -s -l 127.0.0.1"'; \
-    echo 'user = www-data'; \
-    echo 'startsecs = 0'; \
-    echo 'autorestart = false'; \
-) >> /etc/supervisor/conf.d/supervisord.conf
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
  
 # Modify syslog configuration
 RUN sed -i -E 's/^(\s*)system\(\);/\1unix-stream("\/dev\/log");/' /etc/syslog-ng/syslog-ng.conf

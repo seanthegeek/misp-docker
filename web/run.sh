@@ -97,14 +97,14 @@ if [ -r /.firstboot.tmp ]; then
 
         # Fix the base url
         if [ -z "$MISP_FQDN" ]; then
-                echo "No base URL defined, don't forget to define it manually!"
+                echo "No MISP_FQDN defined, don't forget to define it manually!"
         else
                 echo "Fixing the MISP base URL (https://$MISP_FQDN) ..."
-                sed -i "s/'baseurl' => '',/'baseurl' => 'https://$MISP_FQDN',/" /var/www/MISP/app/Config/config.php
+                sed -i "s/'baseurl' => '',/'baseurl' => 'http\s://$MISP_FQDN',/" /var/www/MISP/app/Config/config.php
         fi
 
         # Fix the org name
-        if [ -z "$MISP_FQDN" ]; then
+        if [ -z "$MISP_ORG" ]; then
                 echo "No org name defined, don't forget to define it manually!"
         else
                 echo "Setting the MISP org name"
